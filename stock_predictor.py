@@ -40,4 +40,4 @@ prices.head()
 
 
 #rolling average of stock prices
-average = prices.Close.rolling(100).mean()
+average = prices.Close.rolling(200).mean()
