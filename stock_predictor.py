@@ -23,3 +23,21 @@ prices = yf.download(boeing_stock, start, end)
 #visualization of data
 prices
 
+#remove null values
+prices.dropna(inplace=True)
+
+training_data = pd.DataFrame(prices.Close[0: int(len(prices)*0.80)])
+testing_data = pd.DataFrame(prices.Close[int(len(prices)*0.80): len(prices)])
+
+training_data.shape[0]
+testing_data.shape[0]
+
+
+prices.drop(['level_0'], axis=1)
+
+
+prices.head()
+
+
+#rolling average of stock prices
+average = prices.Close.rolling(100).mean()
