@@ -26,18 +26,56 @@ prices
 #remove null values
 prices.dropna(inplace=True)
 
-training_data = pd.DataFrame(prices.Close[0: int(len(prices)*0.80)])
-testing_data = pd.DataFrame(prices.Close[int(len(prices)*0.80): len(prices)])
-
-training_data.shape[0]
-testing_data.shape[0]
-
-
 prices.drop(['level_0'], axis=1)
 
 
 prices.head()
 
-
-#rolling average of stock prices
 average = prices.Close.rolling(200).mean()
+
+#testing vs training data for our model
+
+training_data = pd.DataFrame(prices.Close[0: int(len(prices)*0.80)])
+testing_data = pd.DataFrame(prices.Close[int(len(prices)*0.80): len(prices)])
+
+
+testing_data.shape[0]
+
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler(feature_range=(0,1))
+
+#training data as array
+
+training_data_array = scaler.fit_transform(training_data)
+
+x = []
+y = []
+
+for i in range(100, training_data.shape[0]):
+  x.append(training_data_array[i-100: i])
+  y.append(training_data_array[i, 0])
+
+x, y = np.array(x), np.array(y)
+
+#machine learning model
+
+from keras.layers import Dense, Dropout, LSTM
+from keras.models import Sequential
+
+model = Sequential()
+model.add(LSTM(units=50, activation='relu', return_sequences=True, input_shape=(x.shape[1], 1)))
+model.add(Dropout(0.2))
+
+model.add(LSTM(units=60, activation='relu', return_sequences=True))
+model.add(Dropout(0.3))
+
+model.add(LSTM(units=80, activation='relu', return_sequences=True))
+model.add(Dropout(0.3))
+
+model.add(LSTM(units=120, activation='relu'))
+model.add(Dropout(0.4))
+
+model.add(Dense(units=1))
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(x, y, epochs=50)
